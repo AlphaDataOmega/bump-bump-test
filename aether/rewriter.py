@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 import ast
+import difflib
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
@@ -78,6 +79,55 @@ def _complete_todo(source: str) -> str:
     return "\n".join(replaced) + "\n"
 
 
+def _split_function(source: str) -> str:
+    """Move the body of the first function into a helper."""
+
+    tree = ast.parse(source)
+    lines = source.splitlines()
+
+    target: Optional[ast.FunctionDef] = None
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef):
+            target = node
+            break
+    if not target or target.end_lineno is None:
+        return source
+
+    indent = " " * target.col_offset
+    helper_name = f"_{target.name}_impl"
+    args = [a.arg for a in target.args.args]
+    call_args = ", ".join(args)
+
+    start = target.lineno - 1
+    end = target.end_lineno
+
+    body_lines = lines[target.lineno:end]
+    wrapper: List[str] = [lines[start]]
+    wrapper.append(
+        f"{indent}    \"\"\"Split by AETHER into {helper_name}\"\"\"  # [AETHER_REWRITE]"
+    )
+    call_line = f"{indent}    return {helper_name}({call_args})" if call_args else f"{indent}    return {helper_name}()"
+    wrapper.append(call_line)
+
+    helper_def = [f"{indent}def {helper_name}({', '.join(args)}):"]
+    helper_def.extend(body_lines)
+
+    mutated_lines = lines[:start] + wrapper + lines[end:] + ["", *helper_def]
+    return "\n".join(mutated_lines) + "\n"
+
+
+def _write_diff(original: str, mutated: str, path: Path) -> None:
+    """Write a unified diff between ``original`` and ``mutated`` to ``path``."""
+
+    diff = difflib.unified_diff(
+        original.splitlines(keepends=True),
+        mutated.splitlines(keepends=True),
+        fromfile="original",
+        tofile="mutated",
+    )
+    path.write_text("".join(diff), encoding="utf-8")
+
+
 def rewrite_file(entry: Dict[str, Any], project_root: Path) -> Optional[RewriteResult]:
     """Apply a rewrite strategy to the file described by ``entry``."""
 
@@ -96,6 +146,8 @@ def rewrite_file(entry: Dict[str, Any], project_root: Path) -> Optional[RewriteR
         mutated_src = _insert_docstring(original)
     elif strategy == "complete_todo":
         mutated_src = _complete_todo(original)
+    elif strategy == "split_function":
+        mutated_src = _split_function(original)
     else:
         mutated_src = original
 
@@ -103,6 +155,9 @@ def rewrite_file(entry: Dict[str, Any], project_root: Path) -> Optional[RewriteR
     mut_path.parent.mkdir(parents=True, exist_ok=True)
     with mut_path.open("w", encoding="utf-8") as fh:
         fh.write(mutated_src)
+
+    diff_path = mut_path.with_suffix(mut_path.suffix + ".diff")
+    _write_diff(original, mutated_src, diff_path)
 
     risk = float(entry.get("risk_score", 0))
     confidence = Confidence.HIGH if risk > 0.85 else Confidence.LOW
