@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, List
+from typing import Any, Dict, List
 
 SPARK_CHARS = "▁▂▃▄▅▆▇"
 
@@ -15,7 +15,7 @@ def sparkline(values: List[int]) -> str:
     return ''.join(SPARK_CHARS[int(v / max_val * scale)] for v in values)
 
 
-def generate_reports(data: Dict[str, List], output_dir: str) -> None:
+def generate_reports(data: Dict[str, Any], output_dir: str) -> None:
     json_path = os.path.join(output_dir, "historian_report.json")
     md_path = os.path.join(output_dir, "historian_report.md")
     os.makedirs(output_dir, exist_ok=True)
