@@ -47,7 +47,10 @@ def extract_changed_lines(patch: str) -> Set[int]:
 
 def scan_todos(repo_path: str) -> List[Dict[str, str]]:
     todos = []
-    for root, _, files in os.walk(repo_path):
+    skip_dirs = {".git", "venv", "node_modules", ".venv", "__pycache__"}
+    for root, dirs, files in os.walk(repo_path):
+        # prune directories we don't want to scan
+        dirs[:] = [d for d in dirs if d not in skip_dirs and not d.startswith('.')]
         for fname in files:
             if fname.endswith('.py'):
                 full = os.path.join(root, fname)
