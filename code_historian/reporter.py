@@ -1,4 +1,5 @@
 import json
+import os
 from typing import Dict, List
 
 SPARK_CHARS = "▁▂▃▄▅▆▇"
@@ -15,8 +16,9 @@ def sparkline(values: List[int]) -> str:
 
 
 def generate_reports(data: Dict[str, List], output_dir: str) -> None:
-    json_path = f"{output_dir}/historian_report.json"
-    md_path = f"{output_dir}/historian_report.md"
+    json_path = os.path.join(output_dir, "historian_report.json")
+    md_path = os.path.join(output_dir, "historian_report.md")
+    os.makedirs(output_dir, exist_ok=True)
 
     with open(json_path, 'w', encoding='utf-8') as jf:
         json.dump(data, jf, indent=2)
