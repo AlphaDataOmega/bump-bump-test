@@ -1,0 +1,73 @@
+{
+  "high_churn_files": [
+    {
+      "file": "code_historian/reporter.py",
+      "commit_count": 6
+    },
+    {
+      "file": "code_historian/analyzer.py",
+      "commit_count": 4
+    },
+    {
+      "file": "code_historian/cli.py",
+      "commit_count": 4
+    },
+    {
+      "file": "README.md",
+      "commit_count": 3
+    },
+    {
+      "file": ".gitignore",
+      "commit_count": 2
+    },
+    {
+      "file": "code_historian/__init__.py",
+      "commit_count": 2
+    }
+  ],
+  "high_churn_functions": [
+    {
+      "file": "code_historian/analyzer.py",
+      "function": "scan_todos",
+      "commit_count": 4
+    },
+    {
+      "file": "code_historian/reporter.py",
+      "function": "generate_reports",
+      "commit_count": 6
+    },
+    {
+      "file": "code_historian/cli.py",
+      "function": "main",
+      "commit_count": 4
+    }
+  ],
+  "todos": [
+    {
+      "file": "code_historian/analyzer.py",
+      "line": 9,
+      "text": "TODO_PATTERN = re.compile(r\"#.*\\b(TODO|FIXME)\\b\", re.IGNORECASE)"
+    }
+  ],
+  "test_failures": [],
+  "temporal_churn": {
+    "code_historian/analyzer.py": {
+      "2025-08": 4
+    },
+    "code_historian/reporter.py": {
+      "2025-08": 6
+    },
+    "code_historian/cli.py": {
+      "2025-08": 4
+    },
+    ".gitignore": {
+      "2025-08": 2
+    },
+    "README.md": {
+      "2025-08": 3
+    },
+    "code_historian/__init__.py": {
+      "2025-08": 2
+    }
+  }
+}
