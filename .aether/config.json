@@ -1,0 +1,5 @@
+{
+  "llm_backend": "openai:gpt-4",
+  "max_calls_per_run": 5,
+  "rewrite_threshold": 0.75
+}
