@@ -115,7 +115,14 @@ def analyze_repository(repo_path: str) -> Dict[str, List]:
         if len(commits) >= 3
     ]
 
+    function_edit_counts: Dict[str, int] = defaultdict(int)
+    for (f, _func), commits in function_commits.items():
+        function_edit_counts[f] += len(commits)
+
     todos = scan_todos(repo.working_tree_dir)
+    todo_counts: Dict[str, int] = defaultdict(int)
+    for t in todos:
+        todo_counts[t['file']] += 1
 
     temporal_churn_dict = {f: dict(months) for f, months in temporal_churn.items()}
 
@@ -125,4 +132,7 @@ def analyze_repository(repo_path: str) -> Dict[str, List]:
         'todos': todos,
         'test_failures': test_failures,
         'temporal_churn': temporal_churn_dict,
+        'file_commit_counts': dict(file_commit_counts),
+        'function_edit_counts': dict(function_edit_counts),
+        'todo_counts': dict(todo_counts),
     }
