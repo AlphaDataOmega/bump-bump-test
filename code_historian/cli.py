@@ -3,6 +3,8 @@ import sys
 import git
 
 from .analyzer import analyze_repository
+from .evolution import compute_risk_map, generate_evolution_log
+from .memory import save_memory
 from .reporter import generate_reports
 
 
@@ -18,7 +20,11 @@ def main() -> None:
         print(f"Error: {args.repo_path} is not a valid Git repository.", file=sys.stderr)
         sys.exit(1)
 
+    risk_map = compute_risk_map(args.repo_path, data)
+    evolution_log = generate_evolution_log(risk_map, data['todos'])
+
     generate_reports(data, args.output_dir)
+    save_memory(args.repo_path, args.output_dir, evolution_log, risk_map)
 
 
 if __name__ == '__main__':
